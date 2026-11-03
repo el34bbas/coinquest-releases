@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoinQuest</title>
+<meta name="description" content="CoinQuest turns your salary and saving goal into one daily number. Free budget app for Android, in English, French and Arabic.">
+<meta name="theme-color" content="#EEF1E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1713" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Pixelify+Sans:wght@600&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: the app's own "banknote green on paper" look. One start-aligned column; the hero pairs a
+   pixel headline with a live copy of the app's daily card, the only element that gets the hard shadow. */
+:root {
+  --page: #EEF1E6; --card: #FBFCF7; --ink: #1C3A2B; --muted: #5A6A5F;
+  --accent: #86BC63; --on-accent: #14261C; --coral: #C2483A; --shadow: #1C3A2B; --rule: #CDD6C4;
+  --pixel: "Pixelify Sans", "Space Mono", ui-monospace, monospace;
+  --mono: "Space Mono", ui-monospace, Menlo, Consolas, monospace;
+  --arabic: "Noto Kufi Arabic", "Segoe UI", Tahoma, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0F1713; --card: #17231D; --ink: #E3ECE1; --muted: #8DA093;
+    --accent: #86BC63; --on-accent: #10200F; --coral: #E37365; --shadow: #060A08; --rule: #2A3D32;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.65 var(--mono); }
+:lang(ar) body { font-family: var(--arabic); line-height: 1.8; }
+img { max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* 1112 = four 250px screenshots + three 24px gaps + 20px gutters, so the strip fits without scrolling */
+.wrap { max-width: 1112px; margin-inline: auto; padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-block: 20px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-inline-end: auto; }
+.brand img { width: 44px; height: auto; }
+.brand span { font: 600 22px/1 var(--pixel); }
+.langs { display: flex; gap: 4px; }
+.langs button { font: 400 14px/1 var(--mono); color: var(--muted); background: none; border: 0; padding: 8px 10px; cursor: pointer; border-radius: 4px; }
+.langs button[lang="ar"] { font-family: var(--arabic); }
+.langs button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+
+/* the app's pixel button: square, 2px border, hard shadow */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 22px;
+  font: 700 17px/1.2 var(--mono); color: var(--on-accent); background: var(--accent); text-decoration: none;
+  border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--shadow); cursor: pointer; }
+:lang(ar) .btn { font-family: var(--arabic); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
+.btn.plain { background: var(--card); color: var(--ink); }
+.btn.small { min-height: 40px; padding: 8px 14px; font-size: 15px; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 56px; align-items: center; padding-block: 48px 88px; }
+h1 { font: 600 clamp(44px, 7.4vw, 84px)/1.02 var(--pixel); margin: 0 0 24px; letter-spacing: -0.01em; text-wrap: balance; }
+:lang(ar) h1 { font-family: var(--arabic); font-weight: 700; font-size: clamp(38px, 6vw, 64px); line-height: 1.35; letter-spacing: 0; }
+.lede { font-size: 18px; max-width: 46ch; margin: 0 0 32px; }
+.note { color: var(--muted); font-size: 14px; margin: 16px 0 0; }
+
+.demo { background: var(--card); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--shadow); padding: 24px; display: grid; gap: 14px; }
+.demo .label { font-size: 15px; color: var(--muted); }
+.demo .label.over { color: var(--coral); }
+.demo .num { font: 600 clamp(40px, 6vw, 56px)/1 var(--pixel); font-variant-numeric: tabular-nums; }
+.demo .num.over { color: var(--coral); }
+.demo .meta { font-size: 14px; color: var(--muted); }
+.demo .btn { justify-self: start; }
+.demo .btn img { width: 14px; height: 14px; image-rendering: pixelated; }
+.demo-caption { font-size: 14px; color: var(--muted); margin: 18px 0 0; max-width: 40ch; }
+
+/* sections */
+section.block { padding-block: 72px; border-top: 2px solid var(--rule); }
+h2 { font: 600 clamp(28px, 4vw, 38px)/1.15 var(--pixel); margin: 0 0 40px; text-wrap: balance; }
+:lang(ar) h2 { font-family: var(--arabic); font-weight: 700; line-height: 1.5; }
+
+/* screenshots share the row on wide screens and scroll sideways on phones, where the next one peeks in */
+.shots { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 16px; }
+.shots figure { flex: 1 1 0; min-width: 190px; max-width: 250px; margin: 0; scroll-snap-align: start; display: grid; gap: 12px; align-content: start; }
+.shots img { display: block; width: 100%; height: auto; border: 2px solid var(--ink); }
+.shots figcaption { font-size: 14px; color: var(--muted); }
+
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 40px; margin: 0; padding: 0; list-style: none; }
+.features li { display: grid; gap: 8px; align-content: start; }
+.ico { width: 32px; height: 32px; image-rendering: pixelated; }
+.ico.mask { background: var(--ink); -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat; }
+.features h3 { font: 700 17px/1.35 var(--mono); margin: 8px 0 0; }
+:lang(ar) .features h3 { font-family: var(--arabic); }
+.features p { margin: 0; color: var(--muted); font-size: 15px; }
+
+.install { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 26px; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+.steps li::before { content: counter(step); font: 600 34px/1 var(--pixel); color: var(--accent); }
+.steps p { margin: 0; max-width: 52ch; }
+.steps b { font-weight: 700; }
+.aside { display: grid; gap: 20px; justify-items: start; }
+.aside p { margin: 0; color: var(--muted); max-width: 40ch; }
+
+footer { border-top: 2px solid var(--rule); padding-block: 28px 40px; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 860px) {
+  .hero, .install { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+  .hero { padding-block: 24px 64px; }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .features { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .btn { width: 100%; }
+  .demo .btn { width: auto; }
+  section.block { padding-block: 56px; }
+  .langs button { padding: 8px 6px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .demo .num.tick { animation: tick .25s steps(2) 1; }
+  @keyframes tick { 50% { transform: translateY(3px); } }
+}
+</style>
+</head>
+<body>
+<header class="wrap top">
+  <a class="brand" href="#"><img src="assets/logo.png" alt="" width="44" height="37"><span>CoinQuest</span></a>
+  <nav class="langs" aria-label="Language">
+    <button type="button" lang="en" data-lang="en">English</button>
+    <button type="button" lang="fr" data-lang="fr">Français</button>
+    <button type="button" lang="ar" data-lang="ar">العربية</button>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1 data-t="h1">Know what you can spend today.</h1>
+      <p class="lede" data-t="lede">CoinQuest turns your salary and your saving goal into one number for each day. Log what you spend in two taps, and that number keeps you on track until payday.</p>
+      <a class="btn" href="https://github.com/el34bbas/coinquest-releases/releases/latest/download/CoinQuest.apk" data-t="cta">Download for Android</a>
+      <p class="note" data-t="cta_note">Free, for Android 7 and newer. No account, no ads.</p>
+    </div>
+
+    <div>
+      <div class="demo" aria-live="polite">
+        <span class="label" id="demo-label" data-t="demo_label">Left to spend today</span>
+        <span class="num" id="demo-num">150 MAD</span>
+        <span class="meta" id="demo-meta">3,000 MAD left for 20 days</span>
+        <button type="button" class="btn plain small" id="demo-btn"><img src="assets/icons/minus.svg" alt=""><span id="demo-btn-text">Spend 200 MAD</span></button>
+      </div>
+      <p class="demo-caption" data-t="demo_caption">Try it. Each spend is shared out over the days left until payday.</p>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-t="shots_h">Inside the app</h2>
+      <div class="shots" tabindex="0" role="group" aria-label="Screenshots">
+        <figure><img src="assets/screens/home.webp" alt="" width="540" height="1053"><figcaption data-t="shot_home">Your balance and today's number</figcaption></figure>
+        <figure><img src="assets/screens/hidden.webp" alt="" width="540" height="1053" loading="lazy"><figcaption data-t="shot_hidden">Hide amounts with one tap</figcaption></figure>
+        <figure><img src="assets/screens/loans.webp" alt="" width="540" height="1053" loading="lazy"><figcaption data-t="shot_loans">Who owes whom</figcaption></figure>
+        <figure><img src="assets/screens/tasks.webp" alt="" width="540" height="1053" loading="lazy"><figcaption data-t="shot_tasks">Lists with reminders and alarms</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-t="features_h">What CoinQuest does</h2>
+      <ul class="features">
+        <li><img class="ico" src="assets/icons/coin.svg" alt=""><h3 data-t="f1_t">One number for today</h3><p data-t="f1_d">Your daily budget is what's left this month divided by the days until payday. Spend less today and the days after get a little more. Spend too fast and CoinQuest warns you before your saving goal slips.</p></li>
+        <li><span class="ico mask" style="--src: url(assets/icons/month.svg)"></span><h3 data-t="f2_t">Months that start on payday</h3><p data-t="f2_d">Each month runs from one payday to the next. See what you saved, what you spent, and which categories it went to.</p></li>
+        <li><span class="ico mask" style="--src: url(assets/icons/friends.svg)"></span><h3 data-t="f3_t">Loans with friends</h3><p data-t="f3_d">Note who you lent to and who you borrowed from. Send a friendly reminder, and settle up in one tap.</p></li>
+        <li><span class="ico mask" style="--src: url(assets/icons/boxOn.svg)"></span><h3 data-t="f4_t">Tasks and reminders</h3><p data-t="f4_d">Keep simple lists and get reminded on time, with an alarm for the ones you can't miss.</p></li>
+        <li><span class="ico mask" style="--src: url(assets/icons/home.svg)"></span><h3 data-t="f5_t">Widgets on your home screen</h3><p data-t="f5_d">Log a spend in two taps without opening the app, and tick off tasks right from the widget.</p></li>
+        <li><span class="ico mask" style="--src: url(assets/icons/lock.svg)"></span><h3 data-t="f6_t">Your data stays with you</h3><p data-t="f6_d">No account and no cloud. Everything stays on your phone, behind your fingerprint if you want, and you can back it up to a file.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="install">
+    <div class="wrap">
+      <h2 data-t="install_h">Install in four steps</h2>
+      <div class="install">
+        <ol class="steps">
+          <li><p data-t="s1">On your Android phone, tap Download. If your browser warns about this type of file, tap Download anyway.</p></li>
+          <li><p data-t="s2">Open the file from the download notification or your Downloads folder.</p></li>
+          <li><p data-t="s3">If Android asks, allow your browser to install apps. The switch is called Allow from this source.</p></li>
+          <li><p data-t="s4">Tap Install. If Play Protect says the app is unknown, tap More details, then Install anyway.</p></li>
+        </ol>
+        <div class="aside">
+          <p data-t="update_note">When a new version is out, CoinQuest shows an Update button that downloads it. Your data stays.</p>
+          <a class="btn" href="https://github.com/el34bbas/coinquest-releases/releases/latest/download/CoinQuest.apk" data-t="cta">Download for Android</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">© 2026 CoinQuest</footer>
+
+<script>
+const STRINGS = {
+  en: {
+    h1: "Know what you can spend today.",
+    lede: "CoinQuest turns your salary and your saving goal into one number for each day. Log what you spend in two taps, and that number keeps you on track until payday.",
+    cta: "Download for Android",
+    cta_note: "Free, for Android 7 and newer. No account, no ads.",
+    demo_label: "Left to spend today",
+    demo_over: "Over budget",
+    demo_meta: "{amount} MAD left for {days} days",
+    demo_btn: "Spend 200 MAD",
+    demo_reset: "Start over",
+    demo_caption: "Try it. Each spend is shared out over the days left until payday.",
+    shots_h: "Inside the app",
+    shot_home: "Your balance and today's number",
+    shot_loans: "Who owes whom",
+    shot_tasks: "Lists with reminders and alarms",
+    shot_hidden: "Hide amounts with one tap",
+    features_h: "What CoinQuest does",
+    f1_t: "One number for today",
+    f1_d: "Your daily budget is what's left this month divided by the days until payday. Spend less today and the days after get a little more. Spend too fast and CoinQuest warns you before your saving goal slips.",
+    f2_t: "Months that start on payday",
+    f2_d: "Each month runs from one payday to the next. See what you saved, what you spent, and which categories it went to.",
+    f3_t: "Loans with friends",
+    f3_d: "Note who you lent to and who you borrowed from. Send a friendly reminder, and settle up in one tap.",
+    f4_t: "Tasks and reminders",
+    f4_d: "Keep simple lists and get reminded on time, with an alarm for the ones you can't miss.",
+    f5_t: "Widgets on your home screen",
+    f5_d: "Log a spend in two taps without opening the app, and tick off tasks right from the widget.",
+    f6_t: "Your data stays with you",
+    f6_d: "No account and no cloud. Everything stays on your phone, behind your fingerprint if you want, and you can back it up to a file.",
+    install_h: "Install in four steps",
+    s1: "On your Android phone, tap Download. If your browser warns about this type of file, tap Download anyway.",
+    s2: "Open the file from the download notification or your Downloads folder.",
+    s3: "If Android asks, allow your browser to install apps. The switch is called Allow from this source.",
+    s4: "Tap Install. If Play Protect says the app is unknown, tap More details, then Install anyway.",
+    update_note: "When a new version is out, CoinQuest shows an Update button that downloads it. Your data stays.",
+  },
+  fr: {
+    h1: "Sachez ce que vous pouvez dépenser aujourd'hui.",
+    lede: "CoinQuest transforme votre salaire et votre objectif d'épargne en un seul chiffre par jour. Notez vos dépenses en deux touches, et ce chiffre vous guide jusqu'au jour de paie.",
+    cta: "Télécharger pour Android",
+    cta_note: "Gratuit, pour Android 7 et plus. Sans compte, sans publicité.",
+    demo_label: "Reste à dépenser aujourd'hui",
+    demo_over: "Budget dépassé",
+    demo_meta: "{amount} MAD restants pour {days} jours",
+    demo_btn: "Dépenser 200 MAD",
+    demo_reset: "Recommencer",
+    demo_caption: "Essayez. Chaque dépense est répartie sur les jours qui restent avant la paie.",
+    shots_h: "Aperçu de l'appli",
+    shot_home: "Votre solde et le chiffre du jour",
+    shot_loans: "Qui doit combien à qui",
+    shot_tasks: "Des listes avec rappels et alarmes",
+    shot_hidden: "Masquez les montants d'une touche",
+    features_h: "Ce que fait CoinQuest",
+    f1_t: "Un seul chiffre pour aujourd'hui",
+    f1_d: "Votre budget du jour, c'est ce qui reste ce mois-ci divisé par les jours avant la paie. Dépensez moins aujourd'hui et les jours suivants auront un peu plus. Si vous dépensez trop vite, CoinQuest vous prévient avant que votre objectif d'épargne ne glisse.",
+    f2_t: "Des mois qui commencent le jour de paie",
+    f2_d: "Chaque mois va d'une paie à la suivante. Voyez ce que vous avez épargné, ce que vous avez dépensé et dans quelles catégories.",
+    f3_t: "Les prêts entre amis",
+    f3_d: "Notez à qui vous avez prêté et à qui vous avez emprunté. Envoyez un petit rappel, et soldez le compte en une touche.",
+    f4_t: "Tâches et rappels",
+    f4_d: "Gardez des listes simples et recevez vos rappels à l'heure, avec une alarme pour ceux à ne pas manquer.",
+    f5_t: "Des widgets sur l'écran d'accueil",
+    f5_d: "Notez une dépense en deux touches sans ouvrir l'appli, et cochez vos tâches directement depuis le widget.",
+    f6_t: "Vos données restent chez vous",
+    f6_d: "Pas de compte, pas de cloud. Tout reste sur votre téléphone, protégé par votre empreinte si vous le souhaitez, et vous pouvez le sauvegarder dans un fichier.",
+    install_h: "Installation en quatre étapes",
+    s1: "Sur votre téléphone Android, touchez Télécharger. Si le navigateur vous avertit sur ce type de fichier, touchez Télécharger quand même.",
+    s2: "Ouvrez le fichier depuis la notification de téléchargement ou le dossier Téléchargements.",
+    s3: "Si Android le demande, autorisez votre navigateur à installer des applis. L'option s'appelle Autoriser cette source.",
+    s4: "Touchez Installer. Si Play Protect signale une appli inconnue, touchez Plus de détails, puis Installer quand même.",
+    update_note: "Quand une nouvelle version sort, CoinQuest affiche un bouton Mettre à jour qui la télécharge. Vos données sont conservées.",
+  },
+  ar: {
+    h1: "اعرف كم يمكنك أن تنفق اليوم.",
+    lede: "يحوّل CoinQuest راتبك وهدف ادخارك إلى رقم واحد لكل يوم. سجّل مصاريفك بلمستين، وسيرافقك هذا الرقم حتى يوم الراتب.",
+    cta: "تحميل لأندرويد",
+    cta_note: "مجاني، لأندرويد 7 فما فوق. بدون حساب وبدون إعلانات.",
+    demo_label: "المتبقي للإنفاق اليوم",
+    demo_over: "تجاوزت الميزانية",
+    demo_meta: "متبقٍ {amount} MAD لمدة {days} يومًا",
+    demo_btn: "أنفق 200 MAD",
+    demo_reset: "ابدأ من جديد",
+    demo_caption: "جرّبه. كل مصروف يُوزَّع على الأيام المتبقية حتى الراتب.",
+    shots_h: "داخل التطبيق",
+    shot_home: "رصيدك ورقم اليوم",
+    shot_loans: "من يدين لمن",
+    shot_tasks: "قوائم مع تذكيرات ومنبّهات",
+    shot_hidden: "أخفِ المبالغ بلمسة واحدة",
+    features_h: "ماذا يفعل CoinQuest",
+    f1_t: "رقم واحد لليوم",
+    f1_d: "ميزانيتك اليومية هي ما تبقى هذا الشهر مقسومًا على الأيام المتبقية حتى الراتب. أنفق أقل اليوم وستحصل الأيام التالية على أكثر قليلًا. وإذا أنفقت بسرعة كبيرة، ينبّهك CoinQuest قبل أن يفوتك هدف الادخار.",
+    f2_t: "أشهر تبدأ يوم الراتب",
+    f2_d: "يمتد كل شهر من راتب إلى الراتب التالي. شاهد ما ادخرته وما أنفقته وفي أي الفئات.",
+    f3_t: "القروض بين الأصدقاء",
+    f3_d: "سجّل لمن أقرضت وممن اقترضت. أرسل تذكيرًا لطيفًا، وسوِّ الحساب بلمسة واحدة.",
+    f4_t: "المهام والتذكيرات",
+    f4_d: "احتفظ بقوائم بسيطة واحصل على تذكيراتك في وقتها، مع منبّه لما لا يجب أن يفوتك.",
+    f5_t: "أدوات على الشاشة الرئيسية",
+    f5_d: "سجّل مصروفًا بلمستين دون فتح التطبيق، وأنجز مهامك مباشرة من الأداة.",
+    f6_t: "بياناتك تبقى عندك",
+    f6_d: "بدون حساب وبدون سحابة. يبقى كل شيء على هاتفك، محميًا ببصمتك إن أردت، ويمكنك حفظ نسخة احتياطية في ملف.",
+    install_h: "التثبيت في أربع خطوات",
+    s1: "على هاتفك الأندرويد، اضغط تحميل. إذا حذّرك المتصفح من نوع الملف، اضغط تنزيل على أي حال.",
+    s2: "افتح الملف من إشعار التحميل أو من مجلد التنزيلات.",
+    s3: "إذا طلب أندرويد ذلك، اسمح للمتصفح بتثبيت التطبيقات. الخيار اسمه السماح من هذا المصدر.",
+    s4: "اضغط تثبيت. إذا نبّهك Play Protect أن التطبيق غير معروف، اضغط مزيد من التفاصيل ثم التثبيت على أي حال.",
+    update_note: "عند صدور إصدار جديد، يعرض CoinQuest زر تحديث يقوم بتنزيله. تبقى بياناتك كما هي.",
+  },
+};
+
+// Same math as the app: what's left this pay cycle, shared over the days until payday.
+const BUDGET = 3000, DAYS = 20, STEP = 200;
+let lang = "en", left = BUDGET;
+
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => n.toLocaleString({ en: "en-US", fr: "fr-FR", ar: "ar-MA" }[lang]);
+
+function renderDemo(tick) {
+  const s = STRINGS[lang], over = left <= 0;
+  $("demo-label").textContent = over ? s.demo_over : s.demo_label;
+  $("demo-label").classList.toggle("over", over);
+  $("demo-num").textContent = fmt(Math.max(0, Math.floor(left / DAYS))) + " MAD";
+  $("demo-num").classList.toggle("over", over);
+  $("demo-meta").textContent = s.demo_meta.replace("{amount}", fmt(Math.max(0, left))).replace("{days}", DAYS);
+  $("demo-btn-text").textContent = over ? s.demo_reset : s.demo_btn;
+  $("demo-btn").querySelector("img").hidden = over;
+  if (tick) {
+    $("demo-num").classList.remove("tick");
+    void $("demo-num").offsetWidth;
+    $("demo-num").classList.add("tick");
+  }
+}
+
+function setLang(next) {
+  lang = STRINGS[next] ? next : "en";
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = STRINGS[lang][el.dataset.t]; });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  renderDemo(false);
+  try { localStorage.setItem("lang", lang); } catch {}
+}
+
+$("demo-btn").addEventListener("click", () => { left = left <= 0 ? BUDGET : left - STEP; renderDemo(true); });
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+// ?lang=fr in a shared link wins, then the visitor's last choice, then their browser language.
+let saved = null;
+try { saved = localStorage.getItem("lang"); } catch {}
+const asked = new URLSearchParams(location.search).get("lang");
+setLang(asked || saved || (navigator.languages || [navigator.language]).map((l) => l.slice(0, 2)).find((l) => STRINGS[l]) || "en");
+</script>
+</body>
+</html>
