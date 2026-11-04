@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Pixelify+Sans:wght@600&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitcount+Single:wght@500&family=Noto+Kufi+Arabic:wght@400;700&family=Pixelify+Sans:wght@600&family=Space+Mono:wght@400;700&display=swap">
 <style>
 /* Layout: the app's own "banknote green on paper" look. One start-aligned column; the hero pairs a
    pixel headline with a live copy of the app's daily card, the only element that gets the hard shadow. */
@@ -19,6 +19,7 @@
   --page: #EEF1E6; --card: #FBFCF7; --ink: #1C3A2B; --muted: #5A6A5F;
   --accent: #86BC63; --on-accent: #14261C; --coral: #C2483A; --shadow: #1C3A2B; --rule: #CDD6C4;
   --pixel: "Pixelify Sans", "Space Mono", ui-monospace, monospace;
+  --num: "Bitcount Single", "Space Mono", ui-monospace, monospace;
   --mono: "Space Mono", ui-monospace, Menlo, Consolas, monospace;
   --arabic: "Noto Kufi Arabic", "Segoe UI", Tahoma, sans-serif;
   color-scheme: light;
@@ -71,7 +72,7 @@ h1 { font: 600 clamp(44px, 7.4vw, 84px)/1.02 var(--pixel); margin: 0 0 24px; let
 .demo { background: var(--card); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--shadow); padding: 24px; display: grid; gap: 14px; }
 .demo .label { font-size: 15px; color: var(--muted); }
 .demo .label.over { color: var(--coral); }
-.demo .num { font: 600 clamp(40px, 6vw, 56px)/1 var(--pixel); font-variant-numeric: tabular-nums; }
+.demo .num { font: 500 clamp(38px, 5.6vw, 52px)/1 var(--num); font-variant-numeric: tabular-nums; }
 .demo .num.over { color: var(--coral); }
 .demo .meta { font-size: 14px; color: var(--muted); }
 .demo .btn { justify-self: start; }
@@ -100,7 +101,7 @@ h2 { font: 600 clamp(28px, 4vw, 38px)/1.15 var(--pixel); margin: 0 0 40px; text-
 .install { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 56px; align-items: start; }
 .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 26px; }
 .steps li { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; align-items: baseline; }
-.steps li::before { content: counter(step); font: 600 34px/1 var(--pixel); color: var(--accent); }
+.steps li::before { content: counter(step); font: 500 32px/1 var(--num); color: var(--accent); }
 .steps p { margin: 0; max-width: 52ch; }
 .steps b { font-weight: 700; }
 .aside { display: grid; gap: 20px; justify-items: start; }
